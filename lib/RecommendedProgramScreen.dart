@@ -82,6 +82,7 @@ class RecommendedProgramScreen extends StatelessWidget {
         'age': age,
         'bmract': dailyCalories.toInt(),
         'dietTitle' : 'Recommended Program',
+
       };
 
       // Update the user's data in the Realtime Database

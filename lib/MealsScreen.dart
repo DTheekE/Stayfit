@@ -1,3 +1,10 @@
+import 'dart:io' as io;
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+
+import 'package:http/http.dart' as http;
+
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +12,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+import 'imgprocess.dart';
 
 class MealsScreen extends StatefulWidget {
   final User user;
@@ -26,6 +37,7 @@ class _MealsScreenState extends State<MealsScreen> {
   double amount = 0.0;
   double totcalories = 0.0;
   bool isLoading = false;
+  final _controller = WebViewController();
 
   @override
   @override
@@ -34,6 +46,33 @@ class _MealsScreenState extends State<MealsScreen> {
     loadCSV();
     totcalories = 0.0;
   }
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+
+  Future<void> _uploadImage(io.File file) async {
+    try {
+      String userId =
+      (_auth.currentUser != null) ? _auth.currentUser!.uid : "unknown_user";
+      String fileName = 'img';
+          //'img_' + DateTime.now().millisecondsSinceEpoch.toString() + '_' + userId;
+
+      Reference storageReference =
+      FirebaseStorage.instance.ref().child('images/$fileName.jpg');
+
+      // Use SettableMetadata to specify that you want to overwrite existing file
+      SettableMetadata metadata = SettableMetadata(contentType: 'image/jpeg');
+
+      UploadTask uploadTask = storageReference.putFile(file, metadata);
+
+      await uploadTask.whenComplete(() {
+        print('File uploaded successfully!');
+      });
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
 
   Future<void> loadCSV() async {
     final String csvString = await rootBundle.loadString('assets/dataset.csv');
@@ -45,13 +84,13 @@ class _MealsScreenState extends State<MealsScreen> {
   }
 
   void calculateCalories(double amountInGrams) {
-    final foodRow = csvData.sublist(1).firstWhere((row) {
-      return row[1].toString().toLowerCase() == selectedFoodItem.toLowerCase();
+    final foodRow = csvData.sublist(0).firstWhere((row) {
+      return row[0].toString().toLowerCase() == selectedFoodItem.toLowerCase();
     }, orElse: () => []);
 
-    if (foodRow.isNotEmpty && foodRow.length > 3) {
+    if (foodRow.isNotEmpty && foodRow.length > 1) {
       final double caloriesPer100g =
-          double.tryParse(foodRow[3].toString()) ?? 0.0;
+          double.tryParse(foodRow[1].toString()) ?? 0.0;
       final double calculatedCalories =
           (caloriesPer100g * amountInGrams) / 100.0;
       setState(() {
@@ -150,8 +189,6 @@ class _MealsScreenState extends State<MealsScreen> {
               ),
             ),
 
-
-
           // Display the user's meals using StreamBuilder
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -232,6 +269,36 @@ class _MealsScreenState extends State<MealsScreen> {
                                             .doc(mealId)
                                             .delete();
                                       },
+                                    ),
+
+
+                                      // the most important part of this example
+
+                                    IconButton(
+                                      icon: Icon(Icons.add_a_photo),
+                                      onPressed: () async {
+                                        try {
+                                          var imagePicker = ImagePicker();
+
+                                          var pickedFile = await imagePicker.pickImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+                                          if (pickedFile != null) {
+                                            var fileToUpload = io.File(pickedFile.path);
+
+                                            // Upload the image (replace this with your upload logic)
+                                            await _uploadImage(fileToUpload);
+
+
+                                            openStreamlitAppSilently();
+                                          } else {
+                                            print('No image selected.');
+                                          }
+                                        } catch (e) {
+                                          print('Error: $e');
+                                        }}
+
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
@@ -349,7 +416,7 @@ class _MealsScreenState extends State<MealsScreen> {
                 ),
                 clearOnSubmit: false,
                 suggestions:
-                    csvData.sublist(1).map((row) => row[1].toString()).toList(),
+                    csvData.sublist(0).map((row) => row[0].toString()).toList(),
                 itemFilter: (item, query) {
                   return item.toLowerCase().contains(query.toLowerCase());
                 },
@@ -577,6 +644,19 @@ class _MealsScreenState extends State<MealsScreen> {
     );
   }
 
+  void openStreamlitAppSilently() async {
+    const url = 'https://stayfit.streamlit.app';
+
+    try {
+      // Make an HTTP request to the URL
+      final response = await http.get(Uri.parse(url));
+
+      // Process the response if needed
+      print('HTTP Status Code: ${response.statusCode}');
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 /*void _showEditFoodItemDialog(
       String currentFoodItem,
       String foodItemId,
@@ -653,4 +733,13 @@ ButtonStyle customElevatedButtonStyle({
 Image getGreetingSymbol() {
   return Image.asset(
       'assets/food.png'); // Replace 'sun.png' with the actual image asset path
+}
+void openStreamlitApp() async {
+  const url = 'https://stayfit.streamlit.app/';
+
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
 }

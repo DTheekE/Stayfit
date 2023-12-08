@@ -188,6 +188,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => NewUser1(user: widget.user,)));
                   },
                   title: Text('Plans'),
+                  enabled: false,
 
                 ),
                 ListTile(
@@ -202,6 +203,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
                 ListTile(
                   leading: Icon(Icons.check),
                   title: Text('Progress'),
+                  enabled: false,
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context) => BMIScreen(user: widget.user)));
@@ -211,6 +213,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
                 ListTile(
                   leading: Icon(Icons.tips_and_updates),
                   title: Text('Tips and Updates'),
+                  enabled: false,
 
                 ),
                 ListTile(
@@ -225,6 +228,7 @@ class _HomeScreen2State extends State<HomeScreen2> {
                 ListTile(
                   leading: Icon(Icons.settings),
                   title: Text('Settings'),
+                  enabled: false,
 
                 ),
                 Divider(),

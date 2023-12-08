@@ -61,6 +61,11 @@ dependencies:
   autocomplete_textfield: ^2.0.1
   csv: ^5.1.1
   image: ^4.1.3
+  googleapis : ^12.0.0
+  googleapis_auth: ^1.4.1
+  url_launcher: ^6.1.14
+  flutter_secure_storage: ^9.0.0
+  webview_flutter: ^4.4.2
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +91,7 @@ flutter:
         - asset: assets/fonts/ProductSans-Regular.ttf
   assets :
     - assets/profile_picture.png
+    - assets/client_secret_142489212594-mkdbqh3fich8cm6qjoo4aannoucfaqtn.apps.googleusercontent.com.json
     - assets/hh.png
     - assets/gm.png
     - assets/ga.png
@@ -95,6 +101,8 @@ flutter:
     - assets/back.jpeg
     - assets/dataset.csv
     - assets/google_logo.png
+    - assets/gdrive.json
+
 
 
 

@@ -347,6 +347,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
             _buildTextFormFieldGender(
               label: 'Gender',
               controller: _genderController,
+              enabled: false,
             ),
 
             SizedBox(height: 16),
@@ -354,6 +355,7 @@ class _AccountSettingsScreenState extends State<AccountSettingsScreen> {
               label: 'Height (cm)',
               controller: _heightController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
+              
             ),
             SizedBox(height: 16),
             _buildTextFormField(
